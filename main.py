@@ -10,7 +10,7 @@ from os.path import join
 
 import algorithm.data_wrangling as data_wrangling
 import algorithm.model as model
-from addpath import configfile_path, output_path
+from addpath import configfile_path, data_path, output_path
 from algorithm.signal_generating import signal_generating_func
 
 if __name__ == '__main__':
@@ -54,6 +54,10 @@ if __name__ == '__main__':
         except ValueError:
             print('-- The input format is incorrect. Please re-specify.')
     input_date_df = data_wrangling.date_identification(input_date_str)
+
+    # create the data path if it does not exist
+    if not os.path.exists(join(data_path, input_date_str)):
+        os.makedirs(join(data_path, input_date_str))
 
     # create the output path if it does not exist
     if not os.path.exists(join(output_path, input_date_str)):
