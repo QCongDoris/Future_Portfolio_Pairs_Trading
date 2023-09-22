@@ -75,7 +75,7 @@ def data_downloading_fully(input_date_df):
             if IndexComponents.size > 0:
                 print('---- Components starting from %s introduced.' % str(component_start_date))
         stk_list = IndexComponents['ticker'].to_list()
-        stk_list = list(set(stk_list))
+        stk_list = list(set(stk_list))[:10]
         del IndexComponents
     else:
         print(

@@ -23,12 +23,8 @@ parameters, and so on, are specified in the configuration file. Developers can m
 changes if necessary.
 
 ### 1.2. Data Wrangling
-The close price of stocks along with the future will be downloaded. The program will
-firstly check if there's any existing price data for the previous day saved in `data`
-folder.
-
-If so, these files would be imported to save the data downloading time. If no, the
-downloading procedure will be fully performed, and it would take around 3 minutes.
+The close price of stocks along with the future will be downloaded. It would take
+around 10 minutes, depending on your Internet connection.
 
 The downloaded/updated datasets will be saved in the `data` folder.
 

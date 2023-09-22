@@ -104,7 +104,6 @@ if __name__ == '__main__':
         f.write(f"-{future_size}")
         f.close()
 
-
     # transform stock values to weights
     portfolio_position = float(signal_df['portfolio_position'].squeeze())
     future_position = float(signal_df['future_position'].squeeze())
@@ -117,11 +116,12 @@ if __name__ == '__main__':
           'the weight on each stock/index future.')
 
     # write the inputted data and computed parameters back to the configuration file
-    initialization_status = 0
+    if initialization_status == 1:
+        initialization_status = 0
+        config['inputs']['initial_capital'] = initial_capital
+        config['inputs']['future_margin_ratio'] = future_margin_ratio
+        config['parameters']['initialization_status'] = str(initialization_status)
     config['inputs']['input_date'] = input_date_str
-    config['inputs']['initial_capital'] = initial_capital
-    config['inputs']['future_margin_ratio'] = future_margin_ratio
-    config['parameters']['initialization_status'] = str(initialization_status)
     config['parameters']['future_size'] = str(future_size)
     with open(configfile_path, 'w') as configfile:
         config.write(configfile)

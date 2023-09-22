@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import configparser
+import shutil
 
 from os.path import join
 from sklearn.linear_model import Lasso
@@ -34,6 +35,10 @@ def lASSO_training(input_date_str, training_df):
         for coef in coef_list:
             f.write(f"{coef}\n")
         f.close()
+    # copy the coefficient file outside the detailed date folder for easier loading later
+    src = join(output_path, input_date_str, 'LASSO_coef.txt')
+    dst = join(output_path, 'LASSO_coef.txt')
+    shutil.copyfile(src, dst)
 
     tmp_time2 = timer()
     print('-- Finish portfolio rebalancing. Time consumed: %.3fs.' % (tmp_time2 - tmp_time1))
