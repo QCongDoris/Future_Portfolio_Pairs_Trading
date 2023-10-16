@@ -52,9 +52,9 @@ def model_training(input_date_str, training_df, portfolio_allocation_list):
     """
     print('-- Start training models.')
     tmp_time1 = timer()
-    AR_p = int(config['parameters']['AR_p'])
-    GARCH_p = int(config['parameters']['GARCH_p'])
-    GARCH_q = int(config['parameters']['GARCH_q'])
+    AR_p = int(config['parameters']['ar_p'])
+    GARCH_p = int(config['parameters']['garch_p'])
+    GARCH_q = int(config['parameters']['garch_q'])
 
     # compute training residuals
     Matrix = training_df.drop(training_df.columns[0:1], axis=1, inplace=False).to_numpy()

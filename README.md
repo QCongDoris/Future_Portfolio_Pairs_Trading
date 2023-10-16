@@ -4,7 +4,7 @@ series. Considering the no-short ban on China's A-Share market, some stocks with
 the specified stock pool will be selected to construct a portfolio first. Then some
 futures will be adopted for hedging purposes.
 
-The logical structure of this structure is described below in `section 1`. An
+The logical structure of this strategy is described below in `section 1`. An
 overview of the scripts and folders is in `section 2`. `section 3` lists the
 environment settings of Python packages adopted in the development of this strategy.
 For detailed definitions and illustrations of each function, please refer to the
@@ -40,8 +40,8 @@ The downloaded/updated datasets will be saved in the `data` folder. The correspo
 contents of each file are illustrated below.
 
 ### 1.4. Model Fitting for Stationary Series
-An `AR(1)` model will be trained using the historical data, for predicting the
-long-run mean trend of the stationary series. A `GARCH(1, 1)` model will be trained
+An _AR_ model will be trained using the historical data, for predicting the
+long-run mean trend of the stationary series. A _GARCH_ model will be trained
 simultaneously for predicting the volatility of the stationary series.
 
 These two models will be updated every time to better monitoring the market
@@ -64,19 +64,59 @@ all positions should be closed.
 ## 2. Overview of the Scripts and Folders
 ### `addpath.py`
 Scripts for files paths. Created and called for better referring between scripts.
+
 ### `main.py`
-The main file to call the algorithm. Run this file to generate straightforward
+The main file to run the algorithm. Run this file to generate straightforward
 signals for trading every day. An input of date will be requested when running
-this script.
+this script. Besides, if this is the first time running this strategy, some extra
+inputs would be requested for initialization purpose.
+
 ### `README.md`
 The current scripts. A manual for the project template.
+
 ### `algorithm`
 Packed scripts and functions for this trading algorithm. Will be utilized to do
 the computations.
-### `config`
-Configuration scripts.
+
+### `config/config.conf`
+Configuration script. For parameters in the `inputs` part:
+- `future_margin_ratio`: The margin ratio for short selling future contract in the
+aimed market. Will be requested upon first running this strategy, then be recorded in
+the configuration and never asked as input again.
+- `input_date`: The date which user would like to get signals for. Will be requested
+as input every time when running this strategy.
+- `initial_capital`: The initial capitalization for running this strategy. Will be
+requested upon first running this strategy, then be recorded in the configuration and
+never asked as input again.
+
+For parameters in the `parameters` part:
+- `ar_p`: The order considered when training the AR model. 1 as default.
+- `boundary_ratio`: Ratio for constructing signal boundaries. The boundaries will be selected
+as _mean +/- boundary_ratio * sd_. 0.5 as default.
+- `future_code`: The code for specifying future contract. Should be matched with the stock
+pool. _IFM_ for CSI300 Index future, _ICM_ for CSI500 Index future, _IMM_ for CSI1000 Index
+future.
+- `future_size`: Size for future contracts. Will be calculated according to `initial_capital`,
+`future_margin_ratio`, `spare_future_margin`, and value of portfolio, and recorded in the
+configuration.
+- `garch_p`: The number of lag variances to include in the GARCH model. 1 as default.
+- `garch_q`: The number of lag residual errors to include in the GARCH model. 1 as default.
+- `initialization_status`: The code for identifying if this is the first time running this
+strategy. 1 if so and 0 if not. After first initialization, this value would be set to 0
+automatically. When first time running, please check and make sure this value is set to 1.
+- `lasso_alpha`: Tuning parameter value for training the LASSO regression model. A larger
+alpha will result in fewer selected stocks. 5 as default.
+- `spare_future_margin_ratio`: Spare ratio for future margin. Its relationship with future value
+and future margin ratio can be represented as `spare_future_margin_ratio = future_margin_value /
+(future_margin_value + spare_margin_value)`, where `future_margin_value = future_margin_ratio *
+future_size * future_contract_value`, _spare_margin_value_ will be calculated according to
+`future_size * future_contract_value = portfolio_value`.
+- `stock_pool`: The code for specifying stock pool. _000300.SH_ for CSI300 Index Component,
+_000905.SH_ for CSI500 Index Component
+
 ### `data`
 Downloaded price data.
+
 ### `output`
 Output files during the algorithm. Including the parameters estimated during the
 process and eventual results. The weight allocation for stocks will be stored in

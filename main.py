@@ -22,6 +22,7 @@ if __name__ == '__main__':
     config.read(configfile_path)
     initialization_status = int(config['parameters']['initialization_status'])
     future_index = config['parameters']['stock_pool']
+    spare_future_margin_ratio = float(config['parameters']['spare_future_margin_ratio'])
 
     # request for inputs and prompt feedback messages to different cases
     input_status = True
@@ -68,7 +69,6 @@ if __name__ == '__main__':
 
     # split for training set, validation set, and testing set
     training_df, testing_df = data_wrangling.training_testing_split(merged_df)
-    # training_df, validation_df = data_wrangling.training_validation_split(training_df)
 
     # rebalance if the input date is the first business day of a month
     if rebalance_status:
@@ -93,11 +93,17 @@ if __name__ == '__main__':
     # compute values for stocks according to LASSO results
     portfolio_position = float(signal_df['portfolio_position'].squeeze())
     future_position = float(signal_df['future_position'].squeeze())
-    port_weights_array = np.asarray(portfolio_allocation_list) * testing_df.iloc[:, 1:].to_numpy()
+    port_values_array = np.asarray(portfolio_allocation_list) * testing_df.iloc[:, 1:].to_numpy()
+    # this portfolio value is just the sum for all stocks assume 1 unit of future contract
 
     # compute contract size for future
     if initialization_status == 1:
-        future_size = math.floor(float(initial_capital) / ((1 + float(future_margin_ratio) + 0.01) * port_weights_array.sum()))
+        spare_margin_value = (1/spare_future_margin_ratio - 1) * float(future_margin_ratio) * port_values_array.sum()
+        spare_margin_value = math.ceil(spare_margin_value * 100) / 100  # round up the value to 2 digits to deal with rounding error
+        future_size = math.floor(float(initial_capital) / ((1 + float(future_margin_ratio) + spare_margin_value) * port_values_array.sum()))
+        # initial_capital = portfolio_value + future_value * (future_margin_ratio + spare_margin_ratio)
+        # here future_value = future_size * future_contract_value = portfolio_value roughly
+        # and future_value * future_margin_ratio / (future_value * future_margin_ratio + spare_margin_value) = spare_future_margin_ratio
     else:
         future_size = float(config['parameters']['future_size'])
     with open(join(output_path, input_date_str, 'future_size.txt'), 'w') as f:
@@ -107,7 +113,7 @@ if __name__ == '__main__':
     # transform stock values to weights
     portfolio_position = float(signal_df['portfolio_position'].squeeze())
     future_position = float(signal_df['future_position'].squeeze())
-    port_weights_array = port_weights_array / port_weights_array.sum()
+    port_weights_array = port_values_array / port_values_array.sum()
     port_weights_df = pd.DataFrame(port_weights_array * portfolio_position,
                                    columns=testing_df.columns[1:], index=[input_date_df.input_date]).T
     port_weights_df.to_csv(join(output_path, input_date_str, 'port_weights.csv'), index=True)
@@ -121,8 +127,8 @@ if __name__ == '__main__':
         config['inputs']['initial_capital'] = initial_capital
         config['inputs']['future_margin_ratio'] = future_margin_ratio
         config['parameters']['initialization_status'] = str(initialization_status)
+        config['parameters']['future_size'] = str(future_size)
     config['inputs']['input_date'] = input_date_str
-    config['parameters']['future_size'] = str(future_size)
     with open(configfile_path, 'w') as configfile:
         config.write(configfile)
 

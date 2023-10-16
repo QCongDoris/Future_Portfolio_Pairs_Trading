@@ -75,7 +75,7 @@ def data_downloading_fully(input_date_df):
             if IndexComponents.size > 0:
                 print('---- Components starting from %s introduced.' % str(component_start_date))
         stk_list = IndexComponents['ticker'].to_list()
-        stk_list = list(set(stk_list))[:10]
+        stk_list = list(set(stk_list))#[:10]
         del IndexComponents
     else:
         print(
@@ -213,18 +213,3 @@ def training_testing_split(data):
 
     return training, testing
 
-
-def training_validation_split(data):
-    """
-        Split the training set and validation set.
-    """
-    # load from the configuration file
-    validation_size = config['parameters']['update_window_size']
-
-    print('-- Start splitting the training and validation set.')
-    tmp_time1 = timer()
-    training, validation = train_test_split(data, test_size=validation_size, shuffle=False)
-    tmp_time2 = timer()
-    print('-- Finish splitting the training and validation set. Time consumed: %.3fs.' % (tmp_time2 - tmp_time1))
-
-    return training, validation
